@@ -1,91 +1,106 @@
 # dsh-fitness 🏋️
 
-DeepSeek Harness 的健身打卡插件与左侧栏画报。本地优先：不联网、无账号，数据存本机 SQLite。
+> **DeepSeek Harness 生态插件**：在你的 AI 助手里加一套健身打卡能力——Agent 工具（`fitness_log`）+ 左侧栏可视化画报面板。本地优先，不联网、无账号，数据存本机 SQLite。
 
-**English TL;DR** — a fitness log plugin for DeepSeek Harness: agent tools (`fitness_log`) + a read-only Web UI panel. Local-first SQLite, MIT licensed.
+[DeepSeek Harness](https://github.com/deepseek-ai/dsh)（DSH）是一个可扩展的本地 AI 工作台：插件以 **bundle** 形式安装，向 Agent 注册工具、向网页注册界面。`dsh-fitness` 就是这样一个 bundle——装进 DSH 后，你的助手（含接入 LLM 的任意 Agent）就能替你做健身记录和统计，网页左侧栏还会长出一个「健身」画报页。
 
-- 插件（Agent 工具）——`fitness_log`：记训练、查今天/历史/周报、建训练计划、看今天该练什么
-- 画报（Web 面板）——左侧栏可视化：今日计划与完成对照、今日训练、动作榜、训练历史、动态健身建议
+```text
+DSH 生态里的位置
 
-仓库结构：
-
+  DeepSeek Harness
+   ├─ 会话 / 工作区 / 记忆 / 日程 ……        ← DSH 本体能力
+   ├─ 第三方插件（可选生态）                 ← 你装的一个个 bundle
+   │   ├─ dsh-fitness   ← 本插件
+   │   │     ├─ Agent 工具：fitness_log（记/查/统计/计划）
+   │   │     └─ Web 面板：健身画报（ui/）
+   │   ├─ 其他插件（QQ 助手、语音、日历……）  ← 可与本插件共存
+   │   └─ ……
+   └─ 数据目录 $DSH_HOME
+         └─ dsh-fitness/fitness.sqlite      ← 本插件的数据（只在你机器上）
 ```
-dsh-fitness/        ← 插件包（package.json 在根）
-  lib/index.js      ← 宿主半：SQLite + fitness_log 工具
-  test/smoke.mjs    ← 冒烟测试
-  ui/               ← 画报包（独立的 DSH 插件包）
-```
+
+## 功能
+
+### 一、Agent 工具 `fitness_log`
+
+装了本插件，你的助手就拥有 8 个健身动作（同一个工具的 8 种 `action`）：
+
+| action | 能做什么 | 示例说法 |
+|---|---|---|
+| `log` | 记录一次训练：动作、组数、每组次数、重量、日期、备注 | 「记一下，卧推 4组 8次 60公斤」 |
+| `today` | 查看今天的训练记录 | 「今天我练了啥？」 |
+| `history` | 按动作/天数查历史 | 「深蹲最近两周是多少重量？」 |
+| `stats` | 周报：总组数、总容量（组数×次数×重量）、各动作容量榜 | 「这周练得怎么样？」 |
+| `plan_add` | 新建训练计划：计划名、星期几、动作列表（组×次@重量） | 「帮我建个周一练胸日：卧推4组8次60公斤、夹胸3组12次」 |
+| `plan_list` | 列出所有计划 | 「我的训练计划都有什么？」 |
+| `plan_remove` | 删除计划 | 「删掉计划 3」 |
+| `plan_today` | 今天该练什么 + 完成对照（哪些动作还差几组） | 「今天该练什么？」 |
+
+工具对 Agent 使用标准 JSON Schema 声明，任何接入 DSH 的模型都能正确调用；返回结构化 JSON（训练记录/统计/计划），助手可自然地转述给你。
+
+### 二、健身画报（左侧栏 Web 面板，`ui/`）
+
+安装在左侧插件栏生成「健身」图标，点开是只读看板：
+
+- **统计卡片**：近 7/30/90 天训练天数、总组数、总容量（吨）
+- **训练计划**：全部计划列表，今天该练的计划高亮「今天」
+- **今日计划对照**：每个动作 ✅ 完成 / ⭕ 已 X 组；没安排时提示「休息日」
+- **今日训练**：今天每条记录（动作、组×次@kg、备注、单条容量）
+- **动作榜**：近 N 天各动作容量排名
+- **训练历史**：按天分组，显示当天练了什么 + 当天容量
+- **健身建议**（根据你的真实数据动态生成）：
+  - 训练频率：本周 0 练提醒从 30 分钟开始；连练 ≥6 天提醒安排休息日
+  - 计划完成度：今天还差几组
+  - 动作休眠：某动作 ≥10 天没练，提醒别掉队
+  - 部位平衡：近两周缺推/拉/腿哪一类
+  - 容量趋势：本周 vs 上周容量变化（涨/跌超 20% 给对应提醒）
+  - 常驻原则：渐进超负荷、蛋白质与睡眠建议
+
+> 面板只读数据库；记录仍通过 `fitness_log` 工具（聊天里说一句话即可），避免两边写冲突。
 
 ## 安装
 
-### 方式一：本地目录安装（推荐，DSH 已有插件管理器）
+前置：已安装 DeepSeek Harness，并有可用的插件管理器（`plugin_manager`）。
 
 ```bash
 git clone https://github.com/cildr/dsh-fitness.git
-cd dsh-fitness
-# 在 DSH 里（或让助手）执行，target 为克隆目录：
-#   plugin_manager install_bundle target=<克隆目录>
-# 画报（可选），target 为克隆目录下的 ui：
-#   plugin_manager install_bundle target=<克隆目录>/ui
 ```
 
-### 方式二：npm
+然后在 DSH 里安装本插件（任选其一）：
 
-> npm 上 `dsh-fitness` 这个名字已被他人占用，本项目的 npm 包名为 `@cildr/dsh-fitness`（发布后可用）。
+- 让助手执行：`plugin_manager install_bundle target=<克隆目录>`
+- 或 DSH 的插件页面「添加插件」选择本地目录
 
-```bash
-dsh plugin --profile <你的 profile> add @cildr/dsh-fitness
-```
+安装画报面板（可选，同一个仓库的 `ui/`）：`plugin_manager install_bundle target=<克隆目录>/ui`
 
-## 工具：fitness_log
+npm 渠道：`dsh-fitness` 名字已被他人占用，本项目发布名为 `@cildr/dsh-fitness`（发布后可用 `dsh plugin add @cildr/dsh-fitness`）。
 
-| action | 说明 |
-|---|---|
-| `log` | 记一次训练：`exercise` 动作名、`sets` 组数、`reps` 每组次数、`weightKg` 重量、`date` 可省=今天、`note` 备注 |
-| `today` | 看今天 |
-| `history` | 查历史：`exercise` 筛动作、`days` 往前几天 |
-| `stats` | 周报：总组数、总容量（组数×次数×重量）、动作榜 |
-| `plan_add` | 建计划：`name` 计划名、`weekday` 周一~周日/每天、`exercises` 动作列表 |
-| `plan_list` | 看所有计划 |
-| `plan_remove` | 删计划（`id`） |
-| `plan_today` | 今天该练什么 + 完成对照 |
+## 使用流程
 
-示例（在 QQ / DSH 对话里）：
+1. 练习结束，对助手（或接入了 DSH 的 QQ 机器人）说：「记一下，深蹲 4组 8次 80公斤」
+2. 第二天问：「今天该练什么？」——助手按计划对照完成度回答
+3. 打开网页左侧栏「健身」，看统计、历史、动作榜和建议
 
-```
-记一下，卧推 4组 8次 60公斤
-今天该练什么？
-这周练得怎么样？
-```
+## 数据与隐私
 
-## 画报面板（ui/）
+- 全部数据存本机：`$DSH_HOME/dsh-fitness/fitness.sqlite`（`$DSH_HOME` 默认 `~/.dsh`）
+- 表：`sets`（训练记录）、`plans`（训练计划）
+- 不联网、无账号、无遥测；删除文件即清空全部数据
 
-左侧插件栏「健身」图标进入：
+## 架构
 
-- 近 7/30/90 天统计：训练天数、总组数、总容量
-- 训练计划：全部计划列表，今天的高亮
-- 今日计划对照：✅ 完成 / ⭕ 已 X 组；休息日提示
-- 今天训练、动作榜、训练历史（按天分组）
-- 健身建议：根据数据动态生成（训练频率、计划未完成、动作休眠、推/拉/腿平衡、容量趋势、渐进原则）
-
-面板只读数据库，记录仍通过 `fitness_log` 工具进行。
-
-## 数据
-
-```
-$DSH_HOME/dsh-fitness/fitness.sqlite    # DSH_HOME 默认 ~/.dsh
-```
-
-表：`sets`（训练记录）、`plans`（训练计划）。
+- 根目录 = 插件包：`lib/index.js` 导出 Cordis 插件 `apply(ctx)`，通过 `ctx.inject(['tools'])` 注册 `fitness_log`；`node:sqlite` 的 `DatabaseSync` 存储数据
+- `ui/` = 画报包：宿主半 `index.js` 用只读 SQLite 连接把数据聚合为一个 HTTP 接口（`/fitness-panel/api/data`）；浏览器半 `client.js` 注册到 DSH 的 `main` 与 `sidebar.panellist` 插槽渲染
+- `cordis.patch.yml`：向 DSH 的 Loader 插入插件行，安装即生效，卸载即移除
 
 ## 开发
 
 ```bash
-node --test test/smoke.mjs   # 插件冒烟测试
+node --test test/smoke.mjs   # 插件冒烟测试（会创建/清理临时库）
 node --check ui/index.js     # 画报宿主半语法检查
 ```
 
-CI 在推送时自动跑 `node --test`。
+CI：GitHub Actions 在每次 push / PR 跑上述检查。
 
 ## License
 
