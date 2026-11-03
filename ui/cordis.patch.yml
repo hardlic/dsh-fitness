@@ -1,0 +1,4 @@
+- insert:
+    - id: fitness-panel
+      name: '@local/fitness-panel'
+      config: {}

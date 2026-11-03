@@ -1,0 +1,47 @@
+{
+  "name": "dsh-fitness",
+  "version": "0.1.0",
+  "description": "Fitness log plugin for DeepSeek Harness: log exercises (sets/reps/weight), browse history, weekly stats. Local-first, no account. 撸铁打卡：记动作、组数、次数、重量，查历史、看周报。",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "dsh-bundle",
+    "fitness",
+    "workout",
+    "gym",
+    "training-log"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cildr/dsh-fitness.git"
+  },
+  "homepage": "https://github.com/cildr/dsh-fitness#readme",
+  "bugs": {
+    "url": "https://github.com/cildr/dsh-fitness/issues"
+  },
+  "files": [
+    "lib/index.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/smoke.mjs"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

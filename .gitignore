@@ -1,0 +1,20 @@
+# runtime data / logs
+*.log
+.tmp*
+.aurabot-cache/
+node_modules/
+
+# local database and panel data
+dsh-fitness/
+fitness.sqlite
+fitness.sqlite-*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# local test artifacts
+coverage/
+*.tgz

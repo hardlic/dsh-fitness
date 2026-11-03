@@ -1,0 +1,11 @@
+# dsh-fitness —— DSH 健身打卡插件
+#
+# 本地优先：训练记录存 $DSH_HOME/dsh-fitness/fitness.sqlite，不联网、无账号。
+# Agent 侧注册 fitness_log 工具：
+#   action=log     记一组/一次训练：exercise（动作）、sets、reps、weightKg、date（默认今天）、note
+#   action=today   看今天的训练
+#   action=history 查某动作/某日期范围的历史（可给 exercise、days）
+#   action=stats   周报：本周各组数/容量（volume = 组数×次数×重量）、各动作容量榜
+- insert:
+    - id: dsh-fitness
+      name: dsh-fitness
