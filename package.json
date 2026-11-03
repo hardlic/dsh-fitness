@@ -26,11 +26,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cildr/dsh-fitness.git"
+    "url": "https://github.com/hardlic/dsh-fitness.git"
   },
-  "homepage": "https://github.com/cildr/dsh-fitness#readme",
+  "homepage": "https://github.com/hardlic/dsh-fitness#readme",
   "bugs": {
-    "url": "https://github.com/cildr/dsh-fitness/issues"
+    "url": "https://github.com/hardlic/dsh-fitness/issues"
   },
   "files": [
     "lib/index.js",

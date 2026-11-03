@@ -1,5 +1,5 @@
 {
-  "name": "@cildr/dsh-fitness-panel",
+  "name": "@hardlic/dsh-fitness-panel",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cildr/dsh-fitness.git",
+    "url": "https://github.com/hardlic/dsh-fitness.git",
     "directory": "ui"
   }
 }

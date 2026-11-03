@@ -63,7 +63,7 @@ DSH 生态里的位置
 前置：已安装 DeepSeek Harness，并有可用的插件管理器（`plugin_manager`）。
 
 ```bash
-git clone https://github.com/cildr/dsh-fitness.git
+git clone https://github.com/hardlic/dsh-fitness.git
 ```
 
 然后在 DSH 里安装本插件（任选其一）：
@@ -73,7 +73,7 @@ git clone https://github.com/cildr/dsh-fitness.git
 
 安装画报面板（可选，同一个仓库的 `ui/`）：`plugin_manager install_bundle target=<克隆目录>/ui`
 
-npm 渠道：`dsh-fitness` 名字已被他人占用，本项目发布名为 `@cildr/dsh-fitness`（发布后可用 `dsh plugin add @cildr/dsh-fitness`）。
+npm 渠道：`dsh-fitness` 名字已被他人占用，本项目发布名为 `@hardlic/dsh-fitness`（发布后可用 `dsh plugin add @hardlic/dsh-fitness`）。
 
 ## 使用流程
 
@@ -104,4 +104,4 @@ CI：GitHub Actions 在每次 push / PR 跑上述检查。
 
 ## License
 
-MIT © cildr
+MIT © hardlic
