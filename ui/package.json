@@ -1,9 +1,9 @@
 {
   "name": "@hardlic/dsh-fitness-panel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Read-only fitness dashboard for dsh-fitness: left-rail panel showing today's plan, sets, weekly stats and history from its SQLite store.",
+  "description": "Fitness dashboard for dsh-fitness v0.2: week strip with streak, timeline check-off, quick log, stats and advice. Left-rail Web panel, local SQLite.",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
