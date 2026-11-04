@@ -33,6 +33,7 @@ window.__ModuleLoader__.load({
 .fp-day .dot.hidden{background:transparent}
 .fp-day .vol{font-size:9px;opacity:.8}
 .fp-timeline{display:flex;flex-direction:column;gap:2px}
+.fp-group{font-size:11px;font-weight:600;color:var(--dsw-alias-label-secondary);margin:10px 0 2px;letter-spacing:.3px}
 .fp-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .fp-row:last-child{border-bottom:none}
 .fp-row .dotline{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
@@ -148,12 +149,11 @@ window.__ModuleLoader__.load({
       const selPlans = plans.filter((p) => p.weekday === '每天' || p.weekday === selWd)
       const doneCount = {}
       for (const r of selRows) doneCount[r.exercise] = (doneCount[r.exercise] || 0) + Number(r.sets || 0)
-      const planItems = []
-      for (const p of selPlans) {
+      const planGroups = selPlans.map((p) => {
         let items = []
         try { items = JSON.parse(p.exercises || '[]') } catch { items = [] }
-        for (const it of items) planItems.push({ planId: p.id, planName: p.name, exercise: it.exercise, sets: it.sets, reps: it.reps, weightKg: it.weightKg, done: doneCount[it.exercise] || 0 })
-      }
+        return { id: p.id, name: p.name, items }
+      }).filter((g) => g.items.length)
       const weekInfo = data?.weekInfo || { daysTrained: 0, volume: 0, planItemsTotal: 0, planItemsDone: 0 }
       const stats = data?.stats || null
 
@@ -201,15 +201,17 @@ window.__ModuleLoader__.load({
           h('div', { className: 'fp-card' },
             h('div', { className: 'fp-card-title' }, `${selected || ''} · ${selWd}${selected === today ? ' · 今天' : ''}`),
             h('div', { className: 'fp-timeline' },
-              planItems.map((it, i) => h('div', { key: 'p' + i, className: 'fp-row' },
-                h('span', { className: ['ring', (doneCount[it.exercise] || 0) >= (it.sets || 1) ? 'done' : ''].join(' ') }, (doneCount[it.exercise] || 0) >= (it.sets || 1) ? '✓' : ''),
-                h('span', { className: 'body' },
-                  h('span', { className: 'name', style: { display: 'block' } }, it.exercise),
-                  h('span', { className: 'meta', style: { display: 'block' } }, `计划 ${it.sets}组${it.reps ? '×' + it.reps : ''}${it.weightKg ? ' @' + it.weightKg + 'kg' : ''} · 已${doneCount[it.exercise] || 0}组`)
-                ),
-                h('span', { className: 'ops' },
-                  (doneCount[it.exercise] || 0) < (it.sets || 1) ? h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: () => checkItem(it) }, '打卡') : null)
-              )),
+              planGroups.map((g) => h('div', { key: 'g' + g.id },
+                h('div', { className: 'fp-group' }, `计划 · ${g.name}`),
+                g.items.map((it, i) => h('div', { key: 'p' + i, className: 'fp-row' },
+                  h('span', { className: ['ring', (doneCount[it.exercise] || 0) >= (it.sets || 1) ? 'done' : ''].join(' ') }, (doneCount[it.exercise] || 0) >= (it.sets || 1) ? '✓' : ''),
+                  h('span', { className: 'body' },
+                    h('span', { className: 'name', style: { display: 'block' } }, it.exercise),
+                    h('span', { className: 'meta', style: { display: 'block' } }, `${it.sets}组${it.reps ? '×' + it.reps : ''}${it.weightKg ? ' @' + it.weightKg + 'kg' : ''} · 已${doneCount[it.exercise] || 0}组`)
+                  ),
+                  h('span', { className: 'ops' },
+                    (doneCount[it.exercise] || 0) < (it.sets || 1) ? h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: () => checkItem(it) }, '打卡') : null)
+                )))),
               selRows.map((r) => h('div', { key: 'r' + r.id, className: 'fp-row' },
                 h('span', { className: 'ring done' }, '✓'),
                 h('span', { className: 'body' },
@@ -217,7 +219,7 @@ window.__ModuleLoader__.load({
                   h('span', { className: 'meta', style: { display: 'block' } }, setStr(r) + (r.note ? ' ｜' + r.note : '') + (volOf(r) > 0 ? ' · ' + Math.round(volOf(r)) + 'kg' : ''))),
                 h('span', { className: 'ops' }, h('button', { type: 'button', className: 'fp-btn danger', disabled: busy, onClick: () => post('unlog', { id: r.id }), title: '撤销这条' }, '✕'))))
             ),
-            !planItems.length && !selRows.length ? h('div', { className: 'fp-empty' }, hiEmpty(selected, today)) : null,
+            !planGroups.length && !selRows.length ? h('div', { className: 'fp-empty' }, hiEmpty(selected, today)) : null,
             h('div', { className: 'fp-form' },
               h('div', { className: 'fp-line' },
                 h('input', { className: 'fp-input', style: { flex: '1 1 46%' }, type: 'text', placeholder: '动作（如 卧推）', value: qName, onChange: (e) => setQName(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
