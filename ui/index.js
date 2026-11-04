@@ -275,4 +275,60 @@ export function apply(ctx) {
     const changed = deleteSets(b.id)
     return changed ? { ok: true } : { ok: false, message: '没有这条记录' }
   })
+
+  // ---------- 训练计划增删改（面板「训练计划页」用） ----------
+  const cleanPlan = (b) => {
+    const name = String(b.name || '').trim()
+    if (!name) throw new Error('计划名不能为空')
+    const wd = String(b.weekday || '每天').trim()
+    const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日', '每天']
+    if (!weekdays.includes(wd)) throw new Error('星期要写成 周一~周日 或 每天')
+    const list = (Array.isArray(b.exercises) ? b.exercises : []).map((e) => ({
+      exercise: String(e && e.exercise || '').trim(),
+      sets: Math.max(1, Number(e && e.sets) || 1),
+      reps: e && e.reps != null && Number.isFinite(Number(e.reps)) ? Number(e.reps) : null,
+      weightKg: e && e.weightKg != null && Number.isFinite(Number(e.weightKg)) ? Number(e.weightKg) : null,
+    })).filter((e) => e.exercise)
+    if (!list.length) throw new Error('至少加一个动作')
+    return { name, weekday: wd, exercises: list }
+  }
+
+  route('/plan-add', async (req) => {
+    const db = openDb(false)
+    if (!db) return { ok: false, message: '数据库还没建好：先记一条训练' }
+    try {
+      const plan = cleanPlan(await readBody(req))
+      const info = db.prepare('INSERT INTO plans (name, weekday, exercises) VALUES (?,?,?)')
+        .run(plan.name, plan.weekday, JSON.stringify(plan.exercises))
+      return { ok: true, id: Number(info.lastInsertRowid), plan, message: `计划已建：${plan.name}（${plan.weekday}）` }
+    } catch (error) { return { ok: false, message: String(error.message || error) } }
+    finally { try { db.close() } catch {} }
+  })
+
+  route('/plan-update', async (req) => {
+    const b = await readBody(req)
+    const id = Number(b.id)
+    if (!Number.isInteger(id)) return { ok: false, message: '缺少计划 id' }
+    const db = openDb(false)
+    if (!db) return { ok: false, message: '数据库不存在' }
+    try {
+      const plan = cleanPlan(b)
+      const info = db.prepare('UPDATE plans SET name=?, weekday=?, exercises=? WHERE id=?')
+        .run(plan.name, plan.weekday, JSON.stringify(plan.exercises), id)
+      return info.changes ? { ok: true, plan, message: `已更新：${plan.name}` } : { ok: false, message: '没有这个计划' }
+    } catch (error) { return { ok: false, message: String(error.message || error) } }
+    finally { try { db.close() } catch {} }
+  })
+
+  route('/plan-remove', async (req) => {
+    const b = await readBody(req)
+    const id = Number(b.id)
+    if (!Number.isInteger(id)) return { ok: false, message: '缺少计划 id' }
+    const db = openDb(false)
+    if (!db) return { ok: false, message: '数据库不存在' }
+    try {
+      const info = db.prepare('DELETE FROM plans WHERE id=?').run(id)
+      return info.changes ? { ok: true, message: '已删除计划' } : { ok: false, message: '没有这个计划' }
+    } finally { try { db.close() } catch {} }
+  })
 }
