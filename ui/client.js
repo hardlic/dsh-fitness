@@ -89,6 +89,18 @@ window.__ModuleLoader__.load({
 .fp-plan-card .head .sp{flex:1}
 .fp-row-item{display:flex;gap:6px;align-items:center;margin-bottom:6px;animation:fadeUp .2s ease both}
 .fp-row-item .n{width:34px;text-align:right;font-size:11px;color:var(--dsw-alias-label-secondary);flex:none}
+.fp-weekrow{display:flex;align-items:stretch;gap:5px}
+.fp-weekrow .fp-week{flex:1;min-width:0}
+.fp-wbtn{border:1px solid var(--dsw-alias-border-l1);background:transparent;color:var(--dsw-alias-label-secondary);border-radius:11px;min-width:26px;flex:none;cursor:pointer;font-size:15px;line-height:1;transition:background .15s,color .15s,transform .08s}
+.fp-wbtn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.fp-wbtn:active:not(:disabled){transform:scale(.94)}
+.fp-wbtn:disabled{opacity:.3;cursor:default}
+.fp-hrow{display:flex;align-items:baseline;gap:10px;padding:7px 4px;border-bottom:1px solid var(--dsw-alias-border-l1);cursor:pointer;transition:background .14s}
+.fp-hrow:last-child{border-bottom:none}
+.fp-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
+.fp-hrow .fd{flex:0 0 108px;font-weight:600;font-size:12.5px;font-variant-numeric:tabular-nums}
+.fp-hrow .fx{flex:1;min-width:0;font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp-hrow .fv{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
 @media (max-width:640px){.fp-wrap{padding:12px 14px 24px;gap:10px}.fp-card{padding:12px 14px}.fp-stats{grid-template-columns:repeat(2,1fr)}.fp-day{padding:8px 0 6px}.fp-head h1{font-size:16px}}
 `
 
@@ -112,6 +124,14 @@ window.__ModuleLoader__.load({
     }
     const setStr = (r) => `${Number(r.sets) || 1}组${r.reps ? '×' + r.reps : ''}${r.weightKg ? '@' + r.weightKg + 'kg' : ''}`
     const volOf = (r) => (Number(r.sets) || 0) * (Number(r.reps) || 0) * (Number(r.weightKg) || 0)
+    /** YYYY-MM-DD 平移 n 天（本地时区安全） */
+    const shiftDate = (dateStr, n) => {
+      const d = new Date((dateStr || '') + 'T00:00:00')
+      if (Number.isNaN(d.getTime())) return dateStr
+      d.setDate(d.getDate() + Number(n) || 0)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+    const mdOf = (dateStr) => String(dateStr || '').slice(5).replace('-', '.')
     const itemStr = (e) => `${e.exercise || ''} ${e.sets || 1}组${e.reps ? '×' + e.reps : ''}${e.weightKg ? ' @' + e.weightKg + 'kg' : ''}`
 
     /** "4x8@60" / "12,10,8@40" → { sets, reps, weightKg } | null */
@@ -136,6 +156,7 @@ window.__ModuleLoader__.load({
       const [days, setDays] = useState(30)
       const [data, setData] = useState(null)
       const [sel, setSel] = useState(null)
+      const [anchor, setAnchor] = useState(null)
       const [err, setErr] = useState('')
       const [busy, setBusy] = useState(false)
       const [qName, setQName] = useState('')
@@ -151,8 +172,12 @@ window.__ModuleLoader__.load({
       }
       useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current) }, [])
 
-      const load = (d) => {
-        fetch(`/fitness-panel/api/data?days=${d || days}`)
+      const fetchData = (d, s, a) => {
+        const p = new URLSearchParams()
+        p.set('days', d || days)
+        if (s) p.set('date', s)
+        if (a) p.set('anchor', a)
+        fetch('/fitness-panel/api/data?' + p.toString())
           .then((r) => r.json())
           .then((d2) => {
             setErr(d2.ok === false ? (d2.message || '读取失败') : '')
@@ -161,7 +186,16 @@ window.__ModuleLoader__.load({
           })
           .catch(() => setErr('接口没连上'))
       }
-      useEffect(() => { load(days) }, [days])
+      const load = (d) => fetchData(d, sel, anchor)
+      useEffect(() => { fetchData(days, null, null) }, [days])
+
+      /** 跳转：date=选中日，anch=周历锚点（缺省=选中日所在周） */
+      const goto = (date, anch) => {
+        const a2 = anch || date
+        setSel(date)
+        setAnchor(a2)
+        fetchData(days, date, a2)
+      }
 
       const post = async (path, body, okMsg) => {
         setBusy(true)
@@ -180,10 +214,7 @@ window.__ModuleLoader__.load({
       const isToday = selected === today
       const selWd = selected ? wdOf(selected) : ''
 
-      const selRows = useMemo(() => {
-        const g = (data?.history || []).find((x) => x.date === selected)
-        return g ? g.rows : []
-      }, [data, selected])
+      const selRows = useMemo(() => data?.sel?.rows || [], [data])
 
       const selPlans = (data?.plans || []).filter((p) => p.weekday === '每天' || p.weekday === selWd)
 
@@ -255,12 +286,12 @@ window.__ModuleLoader__.load({
           h('span', { className: 't1' }, h('span', { className: 'name' }, it.exercise)),
           h('span', { className: 'meta', style: { display: 'block' } }, planMeta(it))),
         h('span', { className: 'ops' },
-          h('button', { type: 'button', className: 'fp-btn primary sm', disabled: busy, onClick: () => checkItem(it) }, '打卡')))
+          isToday ? h('button', { type: 'button', className: 'fp-btn primary sm', disabled: busy, onClick: () => checkItem(it) }, '打卡') : null))
 
       const pendingGroup = (g) => h('div', { key: 'g' + g.id },
         h('div', { className: 'fp-sec', style: { fontWeight: 600 } }, g.name,
           h('span', { className: 'sp' }),
-          h('button', { type: 'button', className: 'fp-btn sm ghost', disabled: busy, onClick: () => checkPlan(g) }, '全部打卡')),
+          isToday ? h('button', { type: 'button', className: 'fp-btn sm ghost', disabled: busy, onClick: () => checkPlan(g) }, '全部打卡') : null),
         g.rows.filter((r) => !r.complete).map(pendingRow))
 
       const doneRow = (it) => h('div', { key: 'd' + it.exercise, className: 'fp-row' },
@@ -282,20 +313,28 @@ window.__ModuleLoader__.load({
         h('span', { className: 'ops' },
           h('button', { type: 'button', className: 'fp-btn x', disabled: busy, onClick: () => post('unlog', { id: r.id }, '已撤销'), title: '撤销' }, '✕')))
 
+      const curAnchor = anchor || today
+      const weekIsCurrent = (data?.week || []).some((d) => d.date === today)
+      const canForward = !weekIsCurrent
+
       const renderDay = () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: 14 } },
         h('div', { className: 'fp-card' },
-          h('div', { className: 'fp-week' }, (data?.week || []).map((d, i) => h('button', {
-            type: 'button', key: d.date,
-            className: ['fp-day', d.date === today ? 'today' : '', d.date === selected ? 'sel' : ''].join(' ').trim(),
-            onClick: () => setSel(d.date),
-            title: d.date + (d.trained ? ' · 已训练' : ''),
-          },
-            h('span', null, WD[i]),
-            h('span', { className: 'n' }, d.date === today ? '今' : d.date.slice(8)),
-            h('i', { className: ['d', d.trained ? '' : 'hide'].join(' ') })))),
+          h('div', { className: 'fp-weekrow' },
+            h('button', { type: 'button', className: 'fp-wbtn', title: '上一周', onClick: () => goto(sel || today, shiftDate(curAnchor, -7)) }, '‹'),
+            h('div', { className: 'fp-week' }, (data?.week || []).map((d, i) => h('button', {
+              type: 'button', key: d.date,
+              className: ['fp-day', d.date === today ? 'today' : '', d.date === selected ? 'sel' : ''].join(' ').trim(),
+              onClick: () => goto(d.date, curAnchor),
+              title: d.date + (d.trained ? ' · 已训练' : ''),
+            },
+              h('span', null, WD[i]),
+              h('span', { className: 'n' }, d.date === today ? '今' : d.date.slice(8)),
+              h('i', { className: ['d', d.trained ? '' : 'hide'].join(' ') })))),
+            h('button', { type: 'button', className: 'fp-wbtn', title: '下一周', disabled: !canForward, onClick: () => goto(sel || today, shiftDate(curAnchor, 7)) }, '›')),
           h('div', { className: 'fp-sec', style: { marginTop: 14 } },
             `${selected || ''} ${selWd}${isToday ? ' · 今天' : ''}`,
             h('span', { className: 'sp' }),
+            !isToday || !weekIsCurrent ? h('button', { type: 'button', className: 'fp-btn sm ghost', style: { marginRight: 8 }, onClick: () => goto(today, today) }, '回今天') : null,
             h('span', { className: 'fp-mini' }, total ? `完成 ${doneCount}/${total}` : '')),
           h('div', { className: 'fp-bar' }, h('i', { style: { width: pct + '%' } })),
           pending.length ? h('div', null,
@@ -305,19 +344,31 @@ window.__ModuleLoader__.load({
             h('div', { className: 'fp-sec' }, `已完成 ${doneCount}`),
             doneRows.map(doneRow),
             extraRows.map(extraRow)) : null,
-          !total ? h('div', { className: 'fp-empty' }, isToday ? '今天没有安排，也没有记录' : '这天没有记录') : null,
+          !total ? h('div', { className: 'fp-empty' }, isToday ? '今天没有安排，也没有记录' : '这天没有安排，也没有记录') : null,
           h('div', { className: 'fp-form' },
             h('div', { className: 'fp-line' },
               h('input', { className: 'fp-input', style: { flex: '1 1 44%' }, type: 'text', placeholder: '动作', value: qName, onChange: (e) => setQName(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
               h('input', { className: 'fp-input', type: 'text', placeholder: '4x8@60', value: qSpec, onChange: (e) => setQSpec(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
-              h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: addQuick }, '记录')),
-            h('div', { className: 'fp-hint' }, '4x8@60 = 4组8次60kg · 12,10,8@40 = 递减'))),
+              h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: addQuick }, isToday ? '记录' : '补录')),
+            h('div', { className: 'fp-hint' }, isToday ? '4x8@60 = 4组8次60kg · 12,10,8@40 = 递减' : `记录到 ${selected}（补录）`))),
         h('div', { className: 'fp-card' },
           h('div', { className: 'fp-stats' },
             h('div', { className: 'fp-stat' }, h('b', null, String(stats ? stats.dayCount : 0)), h('span', null, `${days}天训练`)),
             h('div', { className: 'fp-stat' }, h('b', null, String(stats ? stats.totalSets : 0)), h('span', null, '总组数')),
             h('div', { className: 'fp-stat' }, h('b', null, stats && stats.volume > 0 ? fmtVol(stats.volume) : '—'), h('span', null, '总容量')),
-            h('div', { className: 'fp-stat' }, h('b', null, `${weekInfo.daysTrained}/7`), h('span', null, '本周打卡')))),
+            h('div', { className: 'fp-stat' }, h('b', null, `${weekInfo.daysTrained}/7`), h('span', null, weekIsCurrent ? '本周打卡' : '该周打卡')))),
+        (data?.history || []).length ? h('div', { className: 'fp-card' },
+          h('div', { className: 'fp-sec' }, `训练流水 · 近${days}天`,
+            h('span', { className: 'sp' }),
+            h('button', { type: 'button', className: 'fp-btn sm ghost', title: '切换统计范围 30/90/365 天', onClick: () => setDays(days === 30 ? 90 : days === 90 ? 365 : 30) }, `${days}天 ⇄`)),
+          data.history.map((g) => {
+            const names = []
+            for (const r of g.rows) if (!names.includes(r.exercise)) names.push(r.exercise)
+            return h('div', { key: g.date, className: 'fp-hrow', onClick: () => goto(g.date, g.date), title: '点开这一天的详情' },
+              h('span', { className: 'fd' }, `${mdOf(g.date)} ${wdOf(g.date).replace('周', '')}`),
+              h('span', { className: 'fx' }, names.join(' · ')),
+              h('span', { className: 'fv' }, `${g.rows.length}条 · ${fmtVol(g.volume || 0)}`))
+          })) : null,
         (data?.advice || []).length ? h('div', { className: 'fp-card' },
           h('div', { className: 'fp-sec' }, '健身建议'),
           (data.advice || []).map((a, i) => h('div', { key: i, className: 'fp-tip ' + (a.kind || '') }, a.text))) : null)

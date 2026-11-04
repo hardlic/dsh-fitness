@@ -14,5 +14,7 @@ jobs:
           node-version: '24'
       - name: plugin smoke test
         run: node --test test/smoke.mjs
+      - name: panel history test
+        run: node --test test/panel-history.mjs
       - name: ui host syntax check
         run: node --check ui/index.js

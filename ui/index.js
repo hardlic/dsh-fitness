@@ -1,4 +1,4 @@
-// Host half of @local/fitness-panel v0.2: dashboard API over the dsh-fitness
+// Host half of @local/fitness-panel v0.3.1: dashboard API over the dsh-fitness
 // SQLite store. Reads for the board; a few narrow writes for quick logging
 // and one-tap check-off so the panel is usable without leaving the browser.
 import { DatabaseSync } from 'node:sqlite'
@@ -117,14 +117,30 @@ function buildAdvice(db, { planToday, planDoneRatio }) {
   return tips.slice(0, 6)
 }
 
-function snapshot(days) {
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const realDate = (s) => {
+  if (!DATE_RE.test(String(s || ''))) return null
+  const d = new Date(String(s) + 'T00:00:00')
+  return Number.isNaN(d.getTime()) ? null : String(s)
+}
+
+function snapshot(days, selParam, anchorParam) {
   const today = todayKey()
   const from = daysAgoKey(days)
+  const sel = realDate(selParam) || today
+  const anchor = realDate(anchorParam) || today
+  const anchorBase = new Date(anchor + 'T00:00:00')
+  const selWeekday = WEEKDAY_NAMES[sel === today ? new Date().getDay() : new Date(sel + 'T00:00:00').getDay()]
   const db = openDb(true)
   if (!db) {
-    return { ok: true, found: false, today, weekday: todayWeekday(), days, week: weekKeys(), weekInfo: null, streak: 0, todayRows: [], plans: [], planToday: [], advice: [], stats: null, history: [] }
+    return { ok: true, found: false, today, weekday: todayWeekday(), days, sel: { date: sel, weekday: selWeekday, rows: [], volume: 0 }, week: weekKeys(anchorBase), weekInfo: null, streak: 0, todayRows: [], plans: [], planToday: [], advice: [], stats: null, history: [] }
   }
   try {
+    // 选中日（可为任意历史/未来日期）：详情直接查库，不受 history 窗口限制
+    const selRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note, createdAt FROM sets WHERE date=? ORDER BY id').all(sel)
+    const selVolume = Math.round(selRows.reduce((a, r) => a + volumeOf(r), 0))
+    const selOut = { date: sel, weekday: selWeekday, rows: selRows, volume: selVolume }
+
     const todayRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note, createdAt FROM sets WHERE date=? ORDER BY id').all(today)
     const plans = db.prepare('SELECT id, name, weekday, exercises FROM plans ORDER BY id').all()
     const doneCount = {}
@@ -157,8 +173,8 @@ function snapshot(days) {
     }
     const history = [...byDate.values()].map((g) => ({ ...g, volume: Math.round(g.volume) }))
 
-    // 本周（周一起算）：每天是否有训练、当天容量
-    const wk = weekKeys()
+    // 周历条：以 anchor 为准（默认本周；可翻任意周）
+    const wk = weekKeys(anchorBase)
     const weekMap = new Map()
     for (const r of db.prepare('SELECT date, exercise, sets, reps, weightKg FROM sets WHERE date>=?').all(wk[0])) {
       const cur = weekMap.get(r.date) || { date: r.date, rows: 0, volume: 0, exercises: [] }
@@ -187,6 +203,7 @@ function snapshot(days) {
 
     return {
       ok: true, found: true, today, weekday: todayWeekday(), days,
+      sel: selOut,
       week, weekInfo, streak,
       todayRows, plans, planToday, advice,
       stats: {
@@ -246,8 +263,15 @@ export function apply(ctx) {
 
   route('/data', async (req) => {
     let days = 30
-    try { days = Math.min(365, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('days')) || 30)) } catch {}
-    return snapshot(days)
+    let date = ''
+    let anchor = ''
+    try {
+      const q = new URL(req.url, 'http://x').searchParams
+      days = Math.min(365, Math.max(1, Number(q.get('days')) || 30))
+      date = String(q.get('date') || '')
+      anchor = String(q.get('anchor') || '')
+    } catch {}
+    return snapshot(days, date, anchor)
   })
 
   // 快速记录：{ date?, exercise, sets, reps?, weightKg?, note? }
