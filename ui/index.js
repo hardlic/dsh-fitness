@@ -125,7 +125,7 @@ function snapshot(days) {
     return { ok: true, found: false, today, weekday: todayWeekday(), days, week: weekKeys(), weekInfo: null, streak: 0, todayRows: [], plans: [], planToday: [], advice: [], stats: null, history: [] }
   }
   try {
-    const todayRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note FROM sets WHERE date=? ORDER BY id').all(today)
+    const todayRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note, createdAt FROM sets WHERE date=? ORDER BY id').all(today)
     const plans = db.prepare('SELECT id, name, weekday, exercises FROM plans ORDER BY id').all()
     const doneCount = {}
     for (const r of todayRows) doneCount[r.exercise] = (doneCount[r.exercise] || 0) + Number(r.sets || 0)
@@ -147,7 +147,7 @@ function snapshot(days) {
     const byExercise = db.prepare(`SELECT exercise, COUNT(*) AS entries, SUM(sets) AS sets,
         SUM(COALESCE(sets,1)*COALESCE(reps,0)*COALESCE(weightKg,0)) AS volume
         FROM sets WHERE date>=? GROUP BY exercise ORDER BY volume DESC`).all(from)
-    const historyRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note FROM sets WHERE date>=? ORDER BY date DESC, id DESC LIMIT 300').all(from)
+    const historyRows = db.prepare('SELECT id, date, exercise, sets, reps, weightKg, note, createdAt FROM sets WHERE date>=? ORDER BY date DESC, id DESC LIMIT 300').all(from)
     const byDate = new Map()
     for (const r of historyRows) {
       if (!byDate.has(r.date)) byDate.set(r.date, { date: r.date, rows: [], volume: 0 })

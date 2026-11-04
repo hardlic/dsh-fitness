@@ -6,64 +6,59 @@ window.__ModuleLoader__.load({
     const { useState, useEffect, useMemo } = React
 
     const CSS = `
-.fp-root{display:flex;flex-direction:column;height:100%;min-height:0;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
-.fp-wrap{max-width:560px;width:100%;margin:0 auto;padding:20px 16px 32px;display:flex;flex-direction:column;gap:14px}
-.fp-head{display:flex;align-items:center;gap:8px}
-.fp-head h1{font-size:16px;font-weight:600;margin:0;flex:1}
-.fp-badge{font-size:11px;color:#fff;background:var(--dsw-alias-brand-primary);border-radius:10px;padding:2px 8px;font-weight:600}
-.fp-tabs{display:flex;gap:6px}
-.fp-tab{border:1px solid var(--dsw-alias-border-l1);background:transparent;color:var(--dsw-alias-label-secondary);border-radius:8px;padding:3px 10px;font-size:12px;cursor:pointer}
-.fp-tab.on{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);font-weight:600}
-.fp-card{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);border-radius:12px;padding:14px}
-.fp-card-title{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);margin:0 0 10px;text-transform:uppercase;letter-spacing:.4px}
-.fp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.fp-stat{text-align:center;padding:6px 0}
-.fp-stat b{display:block;font-size:16px;font-weight:600}
-.fp-stat span{font-size:11px;color:var(--dsw-alias-label-secondary)}
-.fp-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.fp-day{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:11px}
+.fp-root{display:flex;flex-direction:column;height:100%;min-height:0;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:12px}
+.fp-wrap{width:100%;max-width:520px;margin:0 auto;padding:14px 12px 24px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.fp-head{display:flex;align-items:center;gap:6px;padding:0 2px}
+.fp-head h1{font-size:14px;font-weight:600;margin:0;flex:1}
+.fp-streak{font-size:10px;color:#fff;background:var(--dsw-alias-brand-primary);border-radius:9px;padding:1px 7px;font-weight:600;line-height:1.6}
+.fp-card{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);border-radius:10px;padding:10px 12px}
+.fp-sec{font-size:10px;font-weight:600;color:var(--dsw-alias-label-secondary);letter-spacing:.5px;text-transform:uppercase;margin:8px 0 4px}
+.fp-sec:first-child{margin-top:0}
+.fp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.fp-stat{text-align:center;padding:2px 0}
+.fp-stat b{display:block;font-size:14px;font-weight:600;line-height:1.25}
+.fp-stat span{font-size:10px;color:var(--dsw-alias-label-secondary)}
+.fp-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.fp-day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 5px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;font-size:10px;line-height:1.1}
 .fp-day:hover{background:var(--dsw-alias-bg-layer-2)}
-.fp-day .n{font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary);line-height:1.1}
+.fp-day .n{font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary)}
 .fp-day.today{color:var(--dsw-alias-brand-primary)}
 .fp-day.today .n{color:var(--dsw-alias-brand-primary)}
 .fp-day.sel{background:var(--dsw-alias-brand-primary);color:#fff}
 .fp-day.sel .n{color:#fff}
-.fp-day .dot{width:4px;height:4px;border-radius:50%;background:var(--dsw-alias-brand-primary)}
-.fp-day.sel .dot{background:#fff}
-.fp-day .dot.hidden{background:transparent}
-.fp-day .vol{font-size:9px;opacity:.8}
-.fp-timeline{display:flex;flex-direction:column;gap:2px}
-.fp-group{font-size:11px;font-weight:600;color:var(--dsw-alias-label-secondary);margin:10px 0 2px;letter-spacing:.3px}
-.fp-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
+.fp-day .d{width:4px;height:4px;border-radius:50%;background:var(--dsw-alias-brand-primary)}
+.fp-day .d.hide{background:transparent}
+.fp-day.sel .d{background:#fff}
+.fp-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .fp-row:last-child{border-bottom:none}
-.fp-row .dotline{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
-.fp-row .ring{width:22px;height:22px;border-radius:50%;border:2px solid var(--dsw-alias-border-l2);display:flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+.fp-row .ring{width:18px;height:18px;border-radius:50%;border:2px solid var(--dsw-alias-border-l2);display:flex;align-items:center;justify-content:center;font-size:10px;flex:none;margin-top:1px}
 .fp-row .ring.done{border-color:var(--dsw-alias-state-success-primary);color:var(--dsw-alias-state-success-primary);font-weight:700}
 .fp-row .body{flex:1;min-width:0}
-.fp-row .name{font-size:13px;font-weight:600;line-height:1.3}
-.fp-row .meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:1px}
-.fp-row .ops{flex:none;display:flex;gap:4px}
-.fp-btn{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer;line-height:1.4}
+.fp-row .t1{display:flex;align-items:baseline;gap:6px}
+.fp-row .name{font-size:12px;font-weight:600;line-height:1.3}
+.fp-row .time{font-size:10px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
+.fp-row .meta{font-size:10px;color:var(--dsw-alias-label-secondary);margin-top:1px;line-height:1.4}
+.fp-row .tag{display:inline-block;font-size:9px;color:var(--dsw-alias-label-secondary);border:1px solid var(--dsw-alias-border-l1);border-radius:5px;padding:0 4px;margin-left:4px;vertical-align:1px}
+.fp-row .ops{flex:none;display:flex;gap:4px;align-items:center;margin-top:1px}
+.fp-btn{border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border-radius:7px;padding:2px 8px;font-size:11px;cursor:pointer;line-height:1.5}
 .fp-btn:hover{background:var(--dsw-alias-bg-layer-2)}
 .fp-btn.primary{background:var(--dsw-alias-brand-primary);border-color:transparent;color:#fff}
-.fp-btn.primary:disabled,.fp-btn:disabled{opacity:.5;cursor:default}
-.fp-btn.danger{color:var(--dsw-alias-state-error-primary)}
-.fp-input{flex:1;min-width:0;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);padding:5px 8px;font-size:13px}
+.fp-btn:disabled{opacity:.5;cursor:default}
+.fp-btn.x{color:var(--dsw-alias-state-error-primary);border-color:transparent;background:transparent;padding:2px 4px}
+.fp-input{flex:1;min-width:0;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);padding:4px 7px;font-size:12px}
 .fp-input:focus{outline:1px solid var(--dsw-alias-brand-primary)}
-.fp-form{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.fp-line{display:flex;gap:6px}
-.fp-hint{font-size:11px;color:var(--dsw-alias-label-secondary);line-height:1.5}
-.fp-err{font-size:12px;color:var(--dsw-alias-state-error-primary)}
-.fp-empty{font-size:12px;color:var(--dsw-alias-label-secondary);padding:8px 0}
-.fp-plan-row{padding:7px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
-.fp-plan-row:last-child{border-bottom:none}
-.fp-plan-head{display:flex;align-items:center;gap:8px}
-.fp-plan-name{font-weight:600;font-size:13px}
-.fp-plan-wd{font-size:11px;color:var(--dsw-alias-label-secondary);border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:0 6px}
-.fp-plan-wd.on{color:#fff;background:var(--dsw-alias-brand-primary);border-color:transparent}
-.fp-plan-items{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
-.fp-chip{font-size:11px;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-2);border-radius:6px;padding:1px 7px}
-.fp-tip{font-size:12px;line-height:1.55;padding:6px 0 6px 10px;border-left:2px solid var(--dsw-alias-border-l2);margin-bottom:4px}
+.fp-form{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.fp-line{display:flex;gap:5px}
+.fp-hint{font-size:10px;color:var(--dsw-alias-label-secondary);line-height:1.5;padding:0 2px}
+.fp-err{font-size:11px;color:var(--dsw-alias-state-error-primary);padding:0 2px}
+.fp-empty{font-size:11px;color:var(--dsw-alias-label-secondary);padding:6px 0}
+.fp-plan{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
+.fp-plan:last-child{border-bottom:none}
+.fp-plan .nm{font-size:12px;font-weight:600;flex:none}
+.fp-plan .wd{font-size:9px;color:var(--dsw-alias-label-secondary);border:1px solid var(--dsw-alias-border-l1);border-radius:5px;padding:0 4px}
+.fp-plan .wd.on{color:#fff;background:var(--dsw-alias-brand-primary);border-color:transparent}
+.fp-plan .items{flex:1;min-width:0;font-size:10px;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-tip{font-size:11px;line-height:1.5;padding:5px 0 5px 8px;border-left:2px solid var(--dsw-alias-border-l2);margin-bottom:3px}
 .fp-tip.start,.fp-tip.balance{border-left-color:var(--dsw-alias-brand-primary)}
 .fp-tip.warn{border-left-color:var(--dsw-alias-state-warn-primary)}
 .fp-tip.plan{border-left-color:var(--dsw-alias-state-idle-primary)}
@@ -80,7 +75,15 @@ window.__ModuleLoader__.load({
 
     const WD = ['一', '二', '三', '四', '五', '六', '日']
     const WD_CN = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    const setStr = (r) => `${Number(r.sets) || 1}组${r.reps ? '×' + r.reps : ''}${r.weightKg ? ' @' + r.weightKg + 'kg' : ''}`
+    const fmtVol = (v) => (v >= 1000 ? (Math.round(v / 100) / 10) + 't' : Math.round(v) + 'kg')
+    const wdOf = (dateStr) => WD_CN[new Date(dateStr + 'T00:00:00').getDay()]
+    const hhmm = (iso) => {
+      if (!iso) return ''
+      const d = new Date(iso)
+      if (Number.isNaN(d.getTime())) return ''
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    }
+    const setStr = (r) => `${Number(r.sets) || 1}组${r.reps ? '×' + r.reps : ''}${r.weightKg ? '@' + r.weightKg + 'kg' : ''}`
     const volOf = (r) => (Number(r.sets) || 0) * (Number(r.reps) || 0) * (Number(r.weightKg) || 0)
 
     /** "4x8@60" / "12,10,8@40" → { sets, reps, weightKg } | null */
@@ -95,12 +98,8 @@ window.__ModuleLoader__.load({
       if (rep) return { sets: Number(rep[1]), reps: Number(rep[2]), weightKg }
       const reps = body.split(',').map(Number).filter((n) => Number.isFinite(n) && n > 0)
       if (!reps.length) return null
-      const total = reps.reduce((a, b) => a + b, 0)
-      return { sets: reps.length, reps: Math.round(total / reps.length), weightKg }
+      return { sets: reps.length, reps: Math.round(reps.reduce((a, b) => a + b, 0) / reps.length), weightKg }
     }
-
-    const wdOf = (dateStr) => WD_CN[new Date(dateStr + 'T00:00:00').getDay()]
-    const fmtVol = (v) => v > 0 ? (v >= 1000 ? (Math.round(v / 100) / 10) + 't' : Math.round(v) + 'kg') : '—'
 
     function FitnessPage() {
       const [days, setDays] = useState(30)
@@ -137,24 +136,39 @@ window.__ModuleLoader__.load({
 
       const today = data?.today || null
       const selected = sel || today
-      const byDate = useMemo(() => {
-        const map = new Map()
-        for (const g of data?.history || []) map.set(g.date, g)
-        return map
-      }, [data])
-      const selGroup = selected ? byDate.get(selected) : null
-      const selRows = selGroup ? selGroup.rows : []
-      const plans = data?.plans || []
+      const isToday = selected === today
       const selWd = selected ? wdOf(selected) : ''
-      const selPlans = plans.filter((p) => p.weekday === '每天' || p.weekday === selWd)
-      const doneCount = {}
-      for (const r of selRows) doneCount[r.exercise] = (doneCount[r.exercise] || 0) + Number(r.sets || 0)
-      const planGroups = selPlans.map((p) => {
+
+      const selRows = useMemo(() => {
+        const g = (data?.history || []).find((x) => x.date === selected)
+        return g ? g.rows : []
+      }, [data, selected])
+
+      const selPlans = (data?.plans || []).filter((p) => p.weekday === '每天' || p.weekday === selWd)
+
+      // 合并：计划项 ↔ 已有记录（同一动作只成一行，「一行一事项」）
+      const planRows = []
+      for (const p of selPlans) {
         let items = []
         try { items = JSON.parse(p.exercises || '[]') } catch { items = [] }
-        return { id: p.id, name: p.name, items }
-      }).filter((g) => g.items.length)
-      const weekInfo = data?.weekInfo || { daysTrained: 0, volume: 0, planItemsTotal: 0, planItemsDone: 0 }
+        for (const it of items) {
+          const recs = selRows.filter((r) => r.exercise === it.exercise)
+          const doneSets = recs.reduce((a, r) => a + Number(r.sets || 0), 0)
+          planRows.push({
+            planId: p.id, planName: p.name, exercise: it.exercise,
+            sets: it.sets, reps: it.reps, weightKg: it.weightKg,
+            recs, doneSets, complete: doneSets >= (it.sets || 1),
+            time: recs.length ? hhmm(recs[0].createdAt) : '',
+            actual: recs.map(setStr).join(' + '),
+          })
+        }
+      }
+      const planExercises = new Set(planRows.map((r) => r.exercise))
+      const extraRows = selRows.filter((r) => !planExercises.has(r.exercise))
+
+      const pending = planRows.filter((r) => !r.complete)
+      const doneRows = planRows.filter((r) => r.complete)
+      const weekInfo = data?.weekInfo || { daysTrained: 0, volume: 0, planItemsDone: 0, planItemsTotal: 0 }
       const stats = data?.stats || null
 
       const addQuick = async () => {
@@ -164,109 +178,92 @@ window.__ModuleLoader__.load({
         const d = await post('quick-log', { date: selected, exercise: qName.trim(), sets: spec.sets, reps: spec.reps, weightKg: spec.weightKg })
         if (d && d.ok) { setQName(''); setQSpec('') }
       }
+      const checkItem = (it) => post('check-item', { exercise: it.exercise, sets: it.sets, reps: it.reps, weightKg: it.weightKg })
 
-      const checkItem = async (it) => {
-        await post('check-item', { exercise: it.exercise, sets: it.sets, reps: it.reps, weightKg: it.weightKg })
-      }
+      // ---------- 渲染 ----------
+      const dayCard = h('div', { className: 'fp-card' },
+        h('div', { className: 'fp-sec' }, `${selected || ''} ${selWd}${isToday ? ' · 今天' : ''}`),
+        pending.length ? h('div', null,
+          h('div', { className: 'fp-sec' }, `待完成 ${pending.length}`),
+          pending.map((it, i) => h('div', { key: 'p' + i, className: 'fp-row' },
+            h('span', { className: 'ring' }, ''),
+            h('span', { className: 'body' },
+              h('span', { className: 't1' },
+                h('span', { className: 'name' }, it.exercise),
+                it.planName ? h('span', { className: 'tag' }, it.planName) : null),
+              h('span', { className: 'meta', style: { display: 'block' } },
+                `${it.sets}组${it.reps ? '×' + it.reps : ''}${it.weightKg ? ' @' + it.weightKg + 'kg' : ''}` + (it.doneSets ? ` · 已${it.doneSets}组` : ''))),
+            h('span', { className: 'ops' }, h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: () => checkItem(it) }, '打卡'))))) : null,
+        doneRows.length || extraRows.length ? h('div', null,
+          h('div', { className: 'fp-sec' }, `已完成 ${doneRows.length + extraRows.length}`),
+          doneRows.map((it, i) => h('div', { key: 'd' + i, className: 'fp-row' },
+            h('span', { className: 'ring done' }, '✓'),
+            h('span', { className: 'body' },
+              h('span', { className: 't1' },
+                h('span', { className: 'name' }, it.exercise),
+                it.time ? h('span', { className: 'time' }, it.time) : null,
+                it.planName ? h('span', { className: 'tag' }, it.planName) : null),
+              h('span', { className: 'meta', style: { display: 'block' } }, it.actual || '已完成')),
+            h('span', { className: 'ops' }))),
+          extraRows.map((r) => h('div', { key: 'x' + r.id, className: 'fp-row' },
+            h('span', { className: 'ring done' }, '✓'),
+            h('span', { className: 'body' },
+              h('span', { className: 't1' },
+                h('span', { className: 'name' }, r.exercise),
+                r.createdAt ? h('span', { className: 'time' }, hhmm(r.createdAt)) : null),
+              h('span', { className: 'meta', style: { display: 'block' } }, setStr(r) + (r.note ? ' ｜' + r.note : '') + (volOf(r) > 0 ? ' · ' + Math.round(volOf(r)) + 'kg' : ''))),
+            h('span', { className: 'ops' }, h('button', { type: 'button', className: 'fp-btn x', disabled: busy, onClick: () => post('unlog', { id: r.id }), title: '撤销' }, '✕'))))) : null,
+        !pending.length && !doneRows.length && !extraRows.length ? h('div', { className: 'fp-empty' }, isToday ? '今天没有安排，也没有记录' : '这天没有记录') : null,
+        h('div', { className: 'fp-form' },
+          h('div', { className: 'fp-line' },
+            h('input', { className: 'fp-input', style: { flex: '1 1 44%' }, type: 'text', placeholder: '动作', value: qName, onChange: (e) => setQName(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
+            h('input', { className: 'fp-input', type: 'text', placeholder: '4x8@60', value: qSpec, onChange: (e) => setQSpec(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
+            h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: addQuick }, '记录')),
+          h('div', { className: 'fp-hint' }, '4x8@60 = 4组8次60kg · 12,10,8@40 = 递减')))
 
       return h('div', { className: 'fp-root' },
         h('style', null, CSS),
         h('div', { className: 'fp-wrap' },
           h('div', { className: 'fp-head' },
-            h(FitnessIcon, { size: 18 }),
+            h(FitnessIcon, { size: 15 }),
             h('h1', null, '健身'),
-            data && data.streak > 0 ? h('span', { className: 'fp-badge', title: '连续打卡天数' }, `🔥 ${data.streak} 天`) : null,
             h('div', { style: { flex: 1 } }),
-            h('div', { className: 'fp-tabs' }, [7, 30, 90].map((d) => h('button', {
-              key: d, type: 'button', className: ['fp-tab', days === d ? 'on' : ''].join(' '),
-              onClick: () => setDays(d), disabled: busy,
-            }, d + '天')))),
+            data && data.streak > 0 ? h('span', { className: 'fp-streak', title: '连续打卡天数' }, `🔥 ${data.streak} 天`) : null),
           err ? h('div', { className: 'fp-err', role: 'alert' }, err) : null,
-          data && data.found === false ? h('div', { className: 'fp-card' }, h('div', { className: 'fp-empty' },
-            '还没有训练数据。去 QQ 跟小鲸说一声「记一下 卧推 4组 8次 60公斤」，或直接在这里记录。')) : null,
-
           h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, '本周 · 点日期查看'),
             h('div', { className: 'fp-week' }, (data?.week || []).map((d, i) => h('button', {
               type: 'button', key: d.date,
               className: ['fp-day', d.date === today ? 'today' : '', d.date === selected ? 'sel' : ''].join(' ').trim(),
               onClick: () => setSel(d.date),
-              title: d.date + (d.trained ? ' 已训练' : ''),
+              title: d.date + (d.trained ? ' · 已训练' : ''),
             },
               h('span', null, WD[i]),
-              h('span', { className: 'n' }, d.date.slice(8)),
-              h('span', { className: 'vol' }, d.volume > 0 ? fmtVol(d.volume) : ' '),
-              h('i', { className: ['dot', d.trained ? '' : 'hidden'].join(' ') }))))),
-
+              h('span', { className: 'n' }, d.date === today ? '今' : d.date.slice(8)),
+              h('i', { className: ['d', d.trained ? '' : 'hide'].join(' ') }))))),
+          data && data.found === false ? h('div', { className: 'fp-card' }, h('div', { className: 'fp-empty' },
+            '还没有训练数据。跟小鲸说「记一下 卧推 4组 8次 60公斤」，或直接在这里记录。')) : null,
+          dayCard,
           h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, `${selected || ''} · ${selWd}${selected === today ? ' · 今天' : ''}`),
-            h('div', { className: 'fp-timeline' },
-              planGroups.map((g) => h('div', { key: 'g' + g.id },
-                h('div', { className: 'fp-group' }, `计划 · ${g.name}`),
-                g.items.map((it, i) => h('div', { key: 'p' + i, className: 'fp-row' },
-                  h('span', { className: ['ring', (doneCount[it.exercise] || 0) >= (it.sets || 1) ? 'done' : ''].join(' ') }, (doneCount[it.exercise] || 0) >= (it.sets || 1) ? '✓' : ''),
-                  h('span', { className: 'body' },
-                    h('span', { className: 'name', style: { display: 'block' } }, it.exercise),
-                    h('span', { className: 'meta', style: { display: 'block' } }, `${it.sets}组${it.reps ? '×' + it.reps : ''}${it.weightKg ? ' @' + it.weightKg + 'kg' : ''} · 已${doneCount[it.exercise] || 0}组`)
-                  ),
-                  h('span', { className: 'ops' },
-                    (doneCount[it.exercise] || 0) < (it.sets || 1) ? h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: () => checkItem(it) }, '打卡') : null)
-                )))),
-              selRows.map((r) => h('div', { key: 'r' + r.id, className: 'fp-row' },
-                h('span', { className: 'ring done' }, '✓'),
-                h('span', { className: 'body' },
-                  h('span', { className: 'name', style: { display: 'block' } }, r.exercise),
-                  h('span', { className: 'meta', style: { display: 'block' } }, setStr(r) + (r.note ? ' ｜' + r.note : '') + (volOf(r) > 0 ? ' · ' + Math.round(volOf(r)) + 'kg' : ''))),
-                h('span', { className: 'ops' }, h('button', { type: 'button', className: 'fp-btn danger', disabled: busy, onClick: () => post('unlog', { id: r.id }), title: '撤销这条' }, '✕'))))
-            ),
-            !planGroups.length && !selRows.length ? h('div', { className: 'fp-empty' }, hiEmpty(selected, today)) : null,
-            h('div', { className: 'fp-form' },
-              h('div', { className: 'fp-line' },
-                h('input', { className: 'fp-input', style: { flex: '1 1 46%' }, type: 'text', placeholder: '动作（如 卧推）', value: qName, onChange: (e) => setQName(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
-                h('input', { className: 'fp-input', type: 'text', placeholder: '4x8@60', value: qSpec, onChange: (e) => setQSpec(e.target.value), onKeyDown: (e) => { if (e.key === 'Enter') addQuick() } }),
-                h('button', { type: 'button', className: 'fp-btn primary', disabled: busy, onClick: addQuick }, '+记')),
-              h('div', { className: 'fp-hint' }, `记到 ${selected || ''}；写法：4x8@60（4组8次60kg）、12,10,8@40（递减）`))),
-
-          h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, `近 ${days} 天`),
             h('div', { className: 'fp-stats' },
-              h('div', { className: 'fp-stat' }, h('b', null, String(stats ? stats.dayCount : 0)), h('span', null, '训练天数')),
+              h('div', { className: 'fp-stat' }, h('b', null, String(stats ? stats.dayCount : 0)), h('span', null, `${days}天训练`)),
               h('div', { className: 'fp-stat' }, h('b', null, String(stats ? stats.totalSets : 0)), h('span', null, '总组数')),
-              h('div', { className: 'fp-stat' }, h('b', null, stats && stats.volume > 0 ? (Math.round(stats.volume / 100) / 10) + 't' : '—'), h('span', null, '总容量')),
+              h('div', { className: 'fp-stat' }, h('b', null, stats && stats.volume > 0 ? fmtVol(stats.volume) : '—'), h('span', null, '总容量')),
               h('div', { className: 'fp-stat' }, h('b', null, `${weekInfo.daysTrained}/7`), h('span', null, '本周打卡')))),
-
-          plans.length ? h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, '训练计划'),
-            plans.map((p) => {
+          (data?.plans || []).length ? h('div', { className: 'fp-card' },
+            h('div', { className: 'fp-sec' }, '训练计划'),
+            (data.plans || []).map((p) => {
               let items = []
               try { items = JSON.parse(p.exercises || '[]') } catch { items = [] }
-              const isToday = p.weekday === '每天' || p.weekday === (data?.weekday || '')
-              return h('div', { key: p.id, className: 'fp-plan-row' },
-                h('div', { className: 'fp-plan-head' },
-                  h('span', { className: 'fp-plan-name' }, p.name),
-                  h('span', { className: 'fp-plan-wd' + (isToday ? ' on' : '') }, isToday ? '今天' : p.weekday)),
-                h('div', { className: 'fp-plan-items' }, items.map((e, i) => h('span', { key: i, className: 'fp-chip' },
-                  `${e.exercise}${e.sets ? ' ' + e.sets + '×' + (e.reps || '?') : ''}${e.weightKg ? ' @' + e.weightKg + 'kg' : ''}`))))
+              const on = p.weekday === '每天' || p.weekday === selWd
+              return h('div', { key: p.id, className: 'fp-plan' },
+                h('span', { className: 'nm' }, p.name),
+                h('span', { className: 'wd' + (on ? ' on' : '') }, on ? '今天' : p.weekday),
+                h('span', { className: 'items' }, items.map((e) => e.exercise).join(' · ')))
             })) : null,
-
-          stats && stats.byExercise.length ? h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, '动作榜'),
-            stats.byExercise.slice(0, 8).map((e) => h('div', { className: 'fp-row' },
-              h('span', { className: 'body' },
-                h('span', { className: 'name', style: { display: 'block' } }, e.exercise),
-                h('span', { className: 'meta', style: { display: 'block' } }, `${e.entries} 条 · ${e.sets} 组`)),
-              h('span', { className: 'meta' }, e.volume > 0 ? Math.round(e.volume) + 'kg' : '')))) : null,
-
           (data?.advice || []).length ? h('div', { className: 'fp-card' },
-            h('div', { className: 'fp-card-title' }, '健身建议'),
+            h('div', { className: 'fp-sec' }, '健身建议'),
             (data.advice || []).map((a, i) => h('div', { key: i, className: 'fp-tip ' + (a.kind || '') }, a.text))) : null,
-
-          h('div', { className: 'fp-hint' },
-            '数据来自 fitness.sqlite；这里可以直接记录/撤销，聊里跟小鲸说也一样。')))
-    }
-
-    function hiEmpty(sel, today) {
-      return sel === today ? '今天还没有记录，动起来！' : '这天没有记录'
+          h('div', { className: 'fp-hint' }, '数据来自本机 fitness.sqlite；这里能记录/撤销，在 QQ 里跟小鲸说也一样。')))
     }
 
     const inject = ['slots']
