@@ -1,6 +1,6 @@
 {
   "name": "dsh-fitness",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Fitness log plugin for DeepSeek Harness: log exercises (sets/reps/weight), browse history, weekly stats. Local-first, no account. 撸铁打卡：记动作、组数、次数、重量，查历史、看周报。",
   "license": "MIT",
   "private": true,

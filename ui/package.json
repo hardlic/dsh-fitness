@@ -1,6 +1,6 @@
 {
   "name": "@hardlic/dsh-fitness-panel",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "description": "Fitness dashboard for dsh-fitness v0.2: week strip with streak, timeline check-off, quick log, stats and advice. Left-rail Web panel, local SQLite.",
